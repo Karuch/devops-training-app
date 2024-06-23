@@ -86,11 +86,14 @@ jobs:
         #echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
+    - name: Set environment variables
+      run: echo "PG_URL=${{ secrets.PG_URL }}" >> $GITHUB_ENV
+
     - name: Update task definition with new image
       id: update-task-def
       run: |
         TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} --region ${{ env.AWS_REGION }})
-        NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "${{ steps.build-image.outputs.image }}" '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+        NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "${{ steps.build-image.outputs.image }}" --arg PG_URL "${{ env.PG_URL }}" '.taskDefinition | .containerDefinitions[0].image = $IMAGE | .containerDefinitions[0].environment += [{"name": "PG_URL", "value": $PG_URL}] | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
         NEW_TASK_DEF_JSON=$(echo $NEW_TASK_DEF | jq -r 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
         echo "$NEW_TASK_DEF_JSON" > new-task-def.json
         aws ecs register-task-definition --cli-input-json file://new-task-def.json --region ${{ env.AWS_REGION }}
