@@ -105,7 +105,12 @@ jobs:
       id: get-new-task-def-arn
       run: |
         NEW_TASK_DEF_ARN=$(aws ecs list-task-definitions --family-prefix ${{ env.ECS_TASK_DEFINITION }} --region ${{ env.AWS_REGION }} --sort DESC | jq -r '.taskDefinitionArns[0]')
+        echo "NEW_TASK_DEF_ARN=${NEW_TASK_DEF_ARN}"
         echo "NEW_TASK_DEF_ARN=${NEW_TASK_DEF_ARN}" >> $GITHUB_ENV
+    
+    - name: Verify new task definition ARN
+      run: |
+        echo "New task definition ARN: ${{ env.NEW_TASK_DEF_ARN }}"
     
     - name: Update ECS service with new task definition
       run: |
