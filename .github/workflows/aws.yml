@@ -76,7 +76,10 @@ jobs:
                "awslogs-stream-prefix": "ecs"
              }
            } |
-           .containerDefinitions[0].environment += [{"name": "REDIS_URL", "value": $REDIS_URL}, {"name": "PG_URL", "value": $PG_URL}] |
+           .containerDefinitions[0].environment +=    .containerDefinitions[0].environment = [
+             { "name": "PG_URL", "value": $PG_URL },
+             { "name": "REDIS_URL", "value": $REDIS_URL }
+           ]' |
            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
         
         NEW_TASK_DEF_JSON=$(echo $NEW_TASK_DEF | jq -r 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
