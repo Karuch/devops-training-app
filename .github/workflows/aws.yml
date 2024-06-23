@@ -49,7 +49,7 @@ jobs:
   
     - name: Set environment variables
       run: |
-        echo "RED_IP=${{ secrets.RED_IP }}" >> $GITHUB_ENV
+        echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> $GITHUB_ENV
         echo "PG_URL=${{ secrets.PG_URL }}" >> $GITHUB_ENV
         echo "$(cat $GITHUB_ENV)"
 
@@ -76,7 +76,7 @@ jobs:
                "awslogs-stream-prefix": "ecs"
              }
            } |
-           .containerDefinitions[0].environment += [{"name": "REDIS_URL", "value": $RED_IP}, {"name": "PG_URL", "value": $PG_URL}] |
+           .containerDefinitions[0].environment += [{"name": "REDIS_URL", "value": $REDIS_URL}, {"name": "PG_URL", "value": $PG_URL}] |
            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
         
         NEW_TASK_DEF_JSON=$(echo $NEW_TASK_DEF | jq -r 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
