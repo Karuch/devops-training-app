@@ -51,6 +51,7 @@ jobs:
       run: |
         echo "PG_URL=${{ secrets.PG_URL }}" >> $GITHUB_ENV
         echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> $GITHUB_ENV
+        echo "${cat "$GITHUB_ENV"}"
 
     - name: Create CloudWatch log group if not exists
       run: |
