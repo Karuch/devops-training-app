@@ -93,8 +93,8 @@ jobs:
       id: update-task-def
       run: |
         TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} --region ${{ env.AWS_REGION }})
-        NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "${{ steps.build-image.outputs.image }}" '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
-        NEW_TASK_DEF_JSON=$(echo $NEW_TASK_DEF | jq -r 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+        NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "${{ steps.build-image.outputs.image }}" '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .deregisteredAt, .registeredAt, .registeredBy)')
+        NEW_TASK_DEF_JSON=$(echo $NEW_TASK_DEF | jq -r 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .deregisteredAt, .registeredBy)')
         echo "$NEW_TASK_DEF_JSON" > new-task-def.json
         aws ecs register-task-definition --cli-input-json file://new-task-def.json --region ${{ env.AWS_REGION }}
 
