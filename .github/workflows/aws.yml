@@ -65,8 +65,8 @@ jobs:
         TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION_FAMILY }} --region ${{ env.AWS_REGION }} | jq '.taskDefinition')
         echo "Original Task Definition: $TASK_DEFINITION"
 
-        # Update the task definition with the new image, log configuration, and environment variable
-        NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "248184751550.dkr.ecr.us-east-1.amazonaws.com/talk-ecr:latest" --arg PG_URL "${{ secrets.PG_URL }}" \
+        # Update the task definition with the new image, log configuration, and environment variables
+        NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "248184751550.dkr.ecr.us-east-1.amazonaws.com/talk-ecr:latest" --arg PG_URL "${{ secrets.PG_URL }}" --arg REDIS_URL "${{ secrets.REDIS_URL }}" \
           '.containerDefinitions[0].image = $IMAGE |
            .containerDefinitions[0].logConfiguration = {
              logDriver: "awslogs",
@@ -76,11 +76,9 @@ jobs:
                "awslogs-stream-prefix": "ecs"
              }
            } |
-           .containerDefinitions[0].environment +=    .containerDefinitions[0].environment = [
-             { "name": "PG_URL", "value": $PG_URL },
-             { "name": "REDIS_URL", "value": $REDIS_URL }
-           ]' |
+           .containerDefinitions[0].environment += [{"name": "PG_URL", "value": $PG_URL}, {"name": "REDIS_URL", "value": $REDIS_URL}] |
            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
+        
         
         NEW_TASK_DEF_JSON=$(echo $NEW_TASK_DEF | jq -r 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
         echo "Updated Task Definition: $NEW_TASK_DEF_JSON"
