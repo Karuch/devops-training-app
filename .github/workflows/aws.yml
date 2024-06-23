@@ -58,7 +58,15 @@ jobs:
 
         # Update the task definition with the new image and remove invalid fields
         NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "248184751550.dkr.ecr.us-east-1.amazonaws.com/talk-ecr:latest" \
-          '.containerDefinitions[0].image = $IMAGE | 
+          '.containerDefinitions[0].image = $IMAGE |
+           .containerDefinitions[0].logConfiguration = {
+             logDriver: "awslogs",
+             options: {
+               "awslogs-group": "/ecs/talk-1337-app-service",
+               "awslogs-region": "us-east-1",
+               "awslogs-stream-prefix": "ecs"
+             }
+           } |
            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
         
         NEW_TASK_DEF_JSON=$(echo $NEW_TASK_DEF | jq -r 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)')
